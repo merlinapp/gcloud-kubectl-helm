@@ -11,6 +11,9 @@ COPY commands.sh /data/commands.sh
 COPY install.sh /tmp/install.sh
 COPY helm-init.sh /tmp/helm-init.sh
 
+COPY proxy /proxy/
+COPY proxy.sh /
+
 RUN chmod +x /tmp/install.sh /tmp/helm-init.sh && \
     /tmp/install.sh
 

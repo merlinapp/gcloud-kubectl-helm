@@ -1,0 +1,14 @@
+# HA Proxy Config
+
+global
+    daemon
+    maxconn 32
+
+defaults
+    timeout client 15s
+    timeout connect 5s
+    timeout server 15s
+
+listen kube-port-forward-in
+    bind *:$PUBLISHED_PORT
+    server kube-port-forward-server 127.0.0.1:$KUBE_PORT check
