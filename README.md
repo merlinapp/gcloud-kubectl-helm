@@ -1,3 +1,35 @@
+# What is Merlin adding to this project?
+
+We want to have a containerized `kubectl` port forwarding, so that we can access remote micro-services inside
+GKE without exposing public IPs. The Kubernetes port forwarding doesn't work alone inside a Docker container,
+we need to add another proxy for the connection to be accessible to sibling containers. Inside your
+`docker-compose.yaml`, add the following service:
+
+```yaml
+<service_name>:
+  build:
+    context: github.com/merlinapp/gcloud-kubectl-helm.git#master
+  volumes:
+    - type: bind
+      source: ./<directory_to_google_service_account_file>
+      target: /keys
+      read_only: true
+  expose:
+    - <port_to_expose>
+  networks:
+    - merlin_net
+  entrypoint:
+    - sh
+    - -c
+    - |
+      gcloud auth activate-service-account --key-file=/keys/<google_service_account_filename>
+      gcloud container clusters get-credentials <cluster> --project <project> --zone <zone>
+      /proxy.sh <port_to_expose> <kubectl_forwarded_port> # These ports must be different. You can pick a random kubectl port number.
+      kubectl --namespace <namespace> port-forward service/<service> <kubectl_forwarded_port>:<micro-service_port>
+```
+
+The original documentation of this repository can be found below.
+
 # gcloud-kubectl-helm
 Docker image for the quaternity of [gcloud](https://cloud.google.com/sdk/docs/), [helm](https://www.helm.sh), [kubectl](https://kubernetes.io/docs/reference/kubectl/kubectl/) and [SOPS](https://github.com/mozilla/sops).
 
